@@ -25,6 +25,7 @@ driver.get('https://channelcrawler.com/')
 #take category values
 
 #show them to select one of them
-drp_menu=driver.find_elements(By.XPATH,'//label[@for="inputGenre"]/div[@class="dropdown-main"]/ul/li')
+drp_menu=driver.find_elements(By.XPATH,'//label[@for="inputGenre"]/parent::div//div[@class="dropdown-main"]/ul/li')
+print(len(drp_menu))
 for i in drp_menu:
     print(i.get_attribute('innerText'))
