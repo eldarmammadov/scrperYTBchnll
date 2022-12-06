@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import Select
 
 from tkinter import *
 
-# going to url(amzn) via Selenium WebDriver
+# going to url(chnnl) via Selenium WebDriver
 chrome_options = Options()
 chrome_options.headless = False
 chrome_options.add_argument("start-maximized")
@@ -45,22 +45,17 @@ def ret_dict(inp_arg):
         lst_val.append(i.get_attribute('innerText'))
         lst_key.append(i.get_attribute('data-value'))
     d_result=dict(zip(lst_key,lst_val))
-    print(lst_val,lst_key)
     return d_result
 
 #take country values
 #show them to select one of them
 drp_menuCountry=driver.find_elements(By.XPATH,'//label[@for="inputLand"]/parent::div//div[@class="dropdown-main"]/ul/li')
 ls_country=[]
-ls_data_valueCountry=[]
 for i in drp_menuCountry:
     ls_country.append(i.get_attribute('innerText'))
-    ls_data_valueCountry.append(i.get_attribute('data-value'))
-d_selectelementsCountry=dict(zip(ls_data_valueCountry,ls_country))
 
 drp_menu=driver.find_elements(By.XPATH,'//label[@for="inputGenre"]/parent::div//div[@class="dropdown-main"]/ul/li')
 ls_categories=[]
-ls_data_value=[]
 for i in drp_menu:
     ls_categories.append(i.get_attribute('innerText'))
 
@@ -68,17 +63,14 @@ for i in drp_menu:
 root = Tk()
 
 # Adjust size
-root.geometry( "200x200" )
+root.geometry( "600x200" )
 
 #select categories
 def choose_categories(val_selected):
-    slect_element=Select(driver.find_element(By.XPATH,'//label[@for="inputGenre"]/parent::div//select[@placeholder="Choose a Category"]'))
     slect_element = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.XPATH, "//div[@class='form-group'][contains(.,'Category')]//div[@class='dropdown-display-label']"))).click()
-    print(type(ret_dict("inputGenre")),ret_dict("inputGenre"))
     for key, value in ret_dict("inputGenre").items():
         if value==val_selected:
-            print(value,type(value))
             WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.XPATH, "//div[@class='form-group'][contains(.,'Category')]//li[@data-value="+key+"]"))).click()
 
@@ -86,23 +78,29 @@ def choose():
     choose_categories(clicked.get())
 
 def choose_Country(val_selected):
-    slect_element=Select(driver.find_element(By.XPATH,'//label[@for="inputLand"]/parent::div//select[@placeholder="Choose a Country"]'))
     elementCountry = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH,
                                                                                  "//div[@class='form-group'][contains(.,'Countries')]//div[@class='dropdown-display-label']"))).click()
     for key, value in ret_dict("inputLand").items():
         if value==val_selected:
-            print(value,type(value))
             WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.XPATH, "//div[@class='form-group'][contains(.,'Countries')]//li[@data-value="+key+"]"))).click()
 
 def chooseCountry():
-    print(clickedCountry.get())
     choose_Country(clickedCountry.get())
 
 # Change the label text
 def show():
     label.config( text = clicked.get() )
     driver.find_element(By.XPATH, '//input[@name="data[query][name]"]').click()
+
+def f_submit():
+    driver.find_element(By.XPATH, '//button[@type="submit"]').click()
+
+#pulling out weblinks from <a> tag after submit
+def a_links():
+    a_hrefs=WebDriverWait(driver,20).until(EC.presence_of_all_elements_located((By.XPATH,'//div[@id="main-content"]/div[2]/div/a')))
+    for web_link in a_hrefs:
+        print(web_link.get_attribute('href'))
 
 # Dropdown menu options
 options = ls_categories
@@ -126,6 +124,9 @@ dropCountry.pack()
 button = Button( root , text = "select" , command = show ).pack()
 btnChCat = Button( root , text = "choose" , command = choose ).pack()
 btnChCountry = Button( root , text = "choose Country" , command = chooseCountry ).pack()
+bntSubmit=Button(root,text="Submit", command=f_submit).pack()
+bntLinks=Button(root,text="GetWebLinks", command=a_links).pack()
+
 
 # Create Label
 label = Label( root , text = " " )
