@@ -10,6 +10,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.support.ui import Select
 
 from tkinter import *
+import pandas as pd
 
 # going to url(chnnl) via Selenium WebDriver
 chrome_options = Options()
@@ -96,11 +97,32 @@ def show():
 def f_submit():
     driver.find_element(By.XPATH, '//button[@type="submit"]').click()
 
+#creating series
+colYTBlink=[]
+colYTBName=[]
+
 #pulling out weblinks from <a> tag after submit
 def a_links():
-    a_hrefs=WebDriverWait(driver,20).until(EC.presence_of_all_elements_located((By.XPATH,'//div[@id="main-content"]/div[2]/div/a')))
+    a_hrefs=WebDriverWait(driver,20).until(EC.presence_of_all_elements_located((By.XPATH,'//div[@id="main-content"]/div[2]/div/h4/a')))
     for web_link in a_hrefs:
-        print(web_link.get_attribute('href'))
+        print(web_link.get_attribute('href'),web_link.text)
+        colYTBlink.append(web_link.get_attribute('href'))
+        colYTBName.append(web_link.text)
+    x_next=WebDriverWait(driver,20).until(EC.visibility_of_element_located((By.XPATH,'//ul[@class="pagination"]/li[last()]'))).get_attribute('class')
+    if x_next=='next':
+        print(WebDriverWait(driver,20).until(EC.visibility_of_element_located((By.XPATH,'//ul[@class="pagination"]/li[last()]'))).get_attribute('class'))
+        w_next = WebDriverWait(driver, 20).until(
+            EC.visibility_of_element_located((By.XPATH, '//ul[@class="pagination"]/li[@class="next"]/a')))
+        w_next.click()
+        a_links()
+    pd_csv()
+
+#creating dict for pd
+def pd_csv():
+    d_output_csv={'url_name':colYTBName,'weburl':colYTBlink}
+    df=pd.DataFrame(d_output_csv)
+    df.to_csv('output.csv')
+    print('written to csv file')
 
 # Dropdown menu options
 options = ls_categories
