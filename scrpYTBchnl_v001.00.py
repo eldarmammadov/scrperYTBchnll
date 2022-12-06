@@ -26,35 +26,43 @@ driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install())
 
 driver.get('https://channelcrawler.com/')
 
-#take category values
-#show them to select one of them
-drp_menu=driver.find_elements(By.XPATH,'//label[@for="inputGenre"]/parent::div//div[@class="dropdown-main"]/ul/li')
-print(len(drp_menu))
-ls_categories=[]
-ls_data_value=[]
-for i in drp_menu:
-    ls_categories.append(i.get_attribute('innerText'))
-    ls_data_value.append(i.get_attribute('data-value'))
+#function
+#creteas dict of both categoris and countries as an output(return) value
+def ret_dict(inp_arg):
+    if inp_arg=='inputGenre':
+        WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
+            (By.XPATH,
+             "//div[@class='form-group'][contains(.,'Category')]//div[@class='dropdown-display-label']"))).click()
+    elif inp_arg=='inputLand':
+        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH,
+                                                                    "//div[@class='form-group'][contains(.,'Countries')]//div[@class='dropdown-display-label']"))).click()
 
-print(ls_categories)
-print(ls_data_value)
-d_selectelements=dict(zip(ls_data_value,ls_categories))
-print(d_selectelements)
+    global lst_val
+    lst_val=[]
+    lst_key=[]
+    s_elmnts=driver.find_elements(By.XPATH,'//label[@for='+'"'+str(inp_arg)+'"'+']/parent::div//div[@class="dropdown-main"]/ul/li')
+    for i in s_elmnts:
+        lst_val.append(i.get_attribute('innerText'))
+        lst_key.append(i.get_attribute('data-value'))
+    d_result=dict(zip(lst_key,lst_val))
+    print(lst_val,lst_key)
+    return d_result
 
 #take country values
 #show them to select one of them
 drp_menuCountry=driver.find_elements(By.XPATH,'//label[@for="inputLand"]/parent::div//div[@class="dropdown-main"]/ul/li')
-print(len(drp_menuCountry))
 ls_country=[]
 ls_data_valueCountry=[]
 for i in drp_menuCountry:
     ls_country.append(i.get_attribute('innerText'))
     ls_data_valueCountry.append(i.get_attribute('data-value'))
-
-print(ls_country)
-print(ls_data_valueCountry)
 d_selectelementsCountry=dict(zip(ls_data_valueCountry,ls_country))
-print(d_selectelementsCountry)
+
+drp_menu=driver.find_elements(By.XPATH,'//label[@for="inputGenre"]/parent::div//div[@class="dropdown-main"]/ul/li')
+ls_categories=[]
+ls_data_value=[]
+for i in drp_menu:
+    ls_categories.append(i.get_attribute('innerText'))
 
 # Create object
 root = Tk()
@@ -63,13 +71,12 @@ root = Tk()
 root.geometry( "200x200" )
 
 #select categories
-
 def choose_categories(val_selected):
     slect_element=Select(driver.find_element(By.XPATH,'//label[@for="inputGenre"]/parent::div//select[@placeholder="Choose a Category"]'))
     slect_element = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
         (By.XPATH, "//div[@class='form-group'][contains(.,'Category')]//div[@class='dropdown-display-label']"))).click()
-
-    for key, value in d_selectelements.items():
+    print(type(ret_dict("inputGenre")),ret_dict("inputGenre"))
+    for key, value in ret_dict("inputGenre").items():
         if value==val_selected:
             print(value,type(value))
             WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
@@ -78,12 +85,11 @@ def choose_categories(val_selected):
 def choose():
     choose_categories(clicked.get())
 
-
 def choose_Country(val_selected):
     slect_element=Select(driver.find_element(By.XPATH,'//label[@for="inputLand"]/parent::div//select[@placeholder="Choose a Country"]'))
     elementCountry = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH,
                                                                                  "//div[@class='form-group'][contains(.,'Countries')]//div[@class='dropdown-display-label']"))).click()
-    for key, value in d_selectelementsCountry.items():
+    for key, value in ret_dict("inputLand").items():
         if value==val_selected:
             print(value,type(value))
             WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
@@ -95,7 +101,8 @@ def chooseCountry():
 
 # Change the label text
 def show():
-	label.config( text = clicked.get() )
+    label.config( text = clicked.get() )
+    driver.find_element(By.XPATH, '//input[@name="data[query][name]"]').click()
 
 # Dropdown menu options
 options = ls_categories
