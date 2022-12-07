@@ -66,6 +66,19 @@ root = Tk()
 # Adjust size
 root.geometry( "600x200" )
 
+#create frames
+frame1=Frame(root)
+frame1.grid(row=0,column=0)
+
+frame1_2=Frame(root,bg='white')
+frame1_2.grid(row=1,column=0)
+
+frame1_3=Frame(root,bg='green')
+frame1_3.grid(row=2,column=0)
+
+frame2=Frame(root,bg='blue')
+frame2.grid(row=0,column=1)
+
 #select categories
 def choose_categories(val_selected):
     slect_element = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
@@ -94,6 +107,9 @@ def show():
     label.config( text = clicked.get() )
     driver.find_element(By.XPATH, '//input[@name="data[query][name]"]').click()
 
+def show2():
+    label2.config( text ='written to csv file' )
+
 def f_submit():
     driver.find_element(By.XPATH, '//button[@type="submit"]').click()
 
@@ -116,13 +132,15 @@ def a_links():
         w_next.click()
         a_links()
     pd_csv()
+    print('written to csv file')
+    show2()
 
 #creating dict for pd
 def pd_csv():
     d_output_csv={'url_name':colYTBName,'weburl':colYTBlink}
     df=pd.DataFrame(d_output_csv)
     df.to_csv('output.csv')
-    print('written to csv file')
+
 
 # Dropdown menu options
 options = ls_categories
@@ -133,26 +151,27 @@ clicked = StringVar()
 clickedCountry = StringVar()
 
 # initial menu text
-clicked.set( "None" )
-clickedCountry.set( "None" )
+clicked.set( " None " )
+clickedCountry.set( " None " )
 
 # Create Dropdown menu
-drop = OptionMenu( root , clicked , *options )
-drop.pack()
-dropCountry = OptionMenu( root , clickedCountry , *options2 )
-dropCountry.pack()
+drop = OptionMenu( frame1 , clicked , *options )
+drop.grid(row=0,column=0)
+dropCountry = OptionMenu( frame1 , clickedCountry , *options2 )
+dropCountry.grid(row=0,column=2)
 
 # Create button, it will change label text
-button = Button( root , text = "select" , command = show ).pack()
-btnChCat = Button( root , text = "choose" , command = choose ).pack()
-btnChCountry = Button( root , text = "choose Country" , command = chooseCountry ).pack()
-bntSubmit=Button(root,text="Submit", command=f_submit).pack()
-bntLinks=Button(root,text="GetWebLinks", command=a_links).pack()
-
+button = Button( frame1 ,width=13, text = "select" , command = show ).grid(row=2,column=0)
+btnChCat = Button( frame1 ,width=13, text = "choose Category" , command = choose ).grid(row=1,column=0)
+btnChCountry = Button( frame1 ,width=13, text = "choose Country" , command = chooseCountry ).grid(row=1,column=2)
+bntSubmit=Button(frame1_2,width=13,text="Search", command=f_submit).grid(row=0,column=0)
+bntLinks=Button(frame1_3,width=13,text="GetWebLinks", command=a_links).grid(row=0,column=0)
 
 # Create Label
-label = Label( root , text = " " )
-label.pack()
+label = Label( frame1 , text = " " )
+label.grid(row=1,column=1)
+label2 = Label( frame2 , text = " " )
+label2.grid(row=4,column=0)
 
 # Execute tkinter
 root.mainloop()
